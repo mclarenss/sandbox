@@ -53,9 +53,9 @@ hook.Add( "DrawOverlay","sandbox_search_progress", function()
 		c:SetText( c.OriginalText .. " ( Scanning: " .. math.ceil( totalCalls / expectedCalls * 100 ) .. "% )")
 	end]]
 
-	local pnl = g_SpawnMenu.SearchPropPanel
-	if ( !g_SpawnMenu:IsVisible() || !pnl:IsVisible() ) then return end
+	if ( !g_SpawnMenu:IsVisible() ) then return end
 
+	local pnl = g_SpawnMenu.SearchPropPanel
 	local x, y = pnl:LocalToScreen( 0, 0 )
 	local maxw = pnl:GetWide()
 	if ( pnl.VBar && pnl.VBar.Enabled ) then maxw = maxw - 20 end
@@ -64,10 +64,10 @@ hook.Add( "DrawOverlay","sandbox_search_progress", function()
 	draw.RoundedBox( 0, x, y, maxw * ( totalCalls / expectedCalls ), 8, Color( 0, 128, 255, 200 ) )
 end )
 
+local model_list = nil
 --
 -- Model Search
 --
-local model_list = nil
 search.AddProvider( function( str )
 
 	str = str:PatternSafe()
@@ -79,15 +79,11 @@ search.AddProvider( function( str )
 
 	end
 
-	local models = {}
+	local list = {}
 
 	for k, v in pairs( model_list ) do
 
-		-- Don't search in the models/ bit of every model, because every model has this bit
-		local modelpath = v
-		if ( modelpath:StartWith( "models/" ) ) then modelpath = modelpath:sub( 8 ) end
-
-		if ( modelpath:find( str ) ) then
+		if ( v:find( str ) ) then
 
 			if ( IsUselessModel( v ) ) then continue end
 
@@ -98,72 +94,83 @@ search.AddProvider( function( str )
 				words = { v }
 			}
 
-			table.insert( models, entry )
+			table.insert( list, entry )
 
 		end
 
-		if ( #models >= 512 ) then break end
+		if ( #list >= 256 ) then break end
 
 	end
 
-	return models
+	return list
 
 end, "props" )
 
 --
 -- Entity, vehicles
 --
-local function AddSearchProvider( listname, ctype, stype )
-	search.AddProvider( function( str )
+search.AddProvider( function( str )
 
-		str = str:PatternSafe()
+	str = str:PatternSafe()
 
-		local results = {}
-		local entities = {}
+	local results = {}
 
-		for k, v in pairs( list.Get( listname ) ) do
-			if ( listname == "Weapon" && !v.Spawnable ) then continue end
-			v.ClassName = k
-			v.PrintName = v.PrintName or v.Name
-			v.ScriptedEntityType = ctype
-			table.insert( entities, v )
+	local entities = {}
+
+	//for k, v in pairs( scripted_ents.GetSpawnable() ) do
+	for k, v in pairs( list.Get( "SpawnableEntities" ) ) do
+		v.ClassName = k
+		v.ScriptedEntityType = "entity"
+		table.insert( entities, v )
+	end
+
+	for k, v in pairs( list.Get( "Vehicles" ) ) do
+		v.ClassName = k
+		v.PrintName = v.Name
+		v.ScriptedEntityType = "vehicle"
+		table.insert( entities, v )
+	end
+
+	for k, v in pairs( list.Get( "NPC" ) ) do
+		v.ClassName = k
+		v.PrintName = v.Name
+		v.ScriptedEntityType = "npc"
+		table.insert( entities, v )
+	end
+
+	for k, v in pairs( list.Get( "Weapon" ) ) do
+		v.ClassName = k
+		v.ScriptedEntityType = "weapon"
+		table.insert( entities, v )
+	end
+
+	for k, v in pairs( entities ) do
+
+		local name = v.ClassName or v.PrintName
+		if ( !name ) then continue end
+
+		if ( name:lower():find( str ) ) then -- TODO: Search print name AND class name?
+
+			local entry = {
+				text = v.PrintName or v.ClassName,
+				icon = spawnmenu.CreateContentIcon( v.ScriptedEntityType or "entity", nil, {
+					nicename = v.PrintName or v.ClassName,
+					spawnname = v.ClassName,
+					material = "entities/" .. v.ClassName .. ".png",
+
+					admin = v.AdminOnly
+				} ),
+				words = { v }
+			}
+
+			table.insert( results, entry )
+
 		end
 
-		for k, v in pairs( entities ) do
+		if ( #results >= 128 ) then break end
 
-			local name = v.PrintName
-			local name_c = v.ClassName
-			if ( !name && !name_c ) then continue end
+	end
 
-			if ( ( name && name:lower():find( str ) ) || ( name_c && name_c:lower():find( str ) ) ) then
+	return results
 
-				local entry = {
-					text = v.PrintName or v.ClassName,
-					icon = spawnmenu.CreateContentIcon( v.ScriptedEntityType or "entity", nil, {
-						nicename = v.PrintName or v.ClassName,
-						spawnname = v.ClassName,
-						material = "entities/" .. v.ClassName .. ".png",
-
-						admin = v.AdminOnly
-					} ),
-					words = { v }
-				}
-
-				table.insert( results, entry )
-
-			end
-
-			if ( #results >= 128 ) then break end
-
-		end
-
-		table.SortByMember( results, "text", true )
-		return results
-
-	end, stype )
-end
-
-AddSearchProvider( "SpawnableEntities", "entity", "entities" )
-AddSearchProvider( "Vehicles", "vehicle", "vehicles" )
-AddSearchProvider( "NPC", "npc", "npcs" )
-AddSearchProvider( "Weapon", "weapon", "weapons" )
+end, "entities" )

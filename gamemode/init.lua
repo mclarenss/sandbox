@@ -16,7 +16,6 @@ AddCSLuaFile( "cl_spawnmenu.lua" )
 AddCSLuaFile( "cl_worldtips.lua" )
 AddCSLuaFile( "persistence.lua" )
 AddCSLuaFile( "player_extension.lua" )
-AddCSLuaFile( "save_load.lua" )
 AddCSLuaFile( "shared.lua" )
 AddCSLuaFile( "gui/IconEditor.lua" )
 

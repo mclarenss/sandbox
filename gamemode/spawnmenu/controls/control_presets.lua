@@ -69,29 +69,26 @@ function PANEL:OnSelect( index, value, data )
 
 end
 
-function PANEL:QuickSaveInternal( text )
-	local tabValues = {}
-	for k, v in pairs( self:GetConVars() ) do
-		tabValues[ v ] = GetConVarString( v )
-	end
-
-	presets.Add( self.m_strPreset, text, tabValues )
-	self:Update()
-end
-
 function PANEL:QuickSavePreset()
-	Derma_StringRequest( "#preset.saveas_title", "#preset.saveas_desc", "", function( text )
-		if ( !text || text:Trim() == "" ) then presets.BadNameAlert() return end
+	Derma_StringRequest(
+		"#preset.saveas_title",
+		"#preset.saveas_desc",
+		"",
+		function( text )
+			if ( !text || text:Trim() == "" ) then return end
 
-		if ( presets.Exists( self.m_strPreset, text ) ) then
-			presets.OverwritePresetPrompt( function()
-				self:QuickSaveInternal( text )
-			end )
-			return
+			local tabValues = {}
+			for k, v in pairs( self:GetConVars() ) do
+				tabValues[ v ] = GetConVarString( v )
+			end
+
+			-- TODO: Handle same name overrides!
+			presets.Add( self.m_strPreset, text, tabValues )
+			self:Update()
+		end,
+		function( text )
 		end
-
-		self:QuickSaveInternal( text )
-	end )
+	)
 end
 
 function PANEL:OpenPresetEditor()
@@ -102,7 +99,7 @@ function PANEL:OpenPresetEditor()
 	self.Window:MakePopup()
 	self.Window:Center()
 	self.Window:SetType( self.m_strPreset )
-	self.Window:SetConVars( self:GetConVars() )
+	self.Window:SetConVars( self.ConVars )
 	self.Window:SetPresetControl( self )
 
 end

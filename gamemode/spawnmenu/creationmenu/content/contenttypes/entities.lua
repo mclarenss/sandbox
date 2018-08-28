@@ -69,7 +69,6 @@ end )
 spawnmenu.AddCreationTab( "#spawnmenu.category.entities", function()
 
 	local ctrl = vgui.Create( "SpawnmenuContentPanel" )
-	ctrl:EnableSearch( "entities", "PopulateEntities" )
 	ctrl:CallPopulateHook( "PopulateEntities" )
 
 	return ctrl

@@ -1,4 +1,6 @@
-
+/*
+CLIENT SIDE
+*/
 AddCSLuaFile( "sandbox/gamemode/spawnmenu/controls/manifest.lua" )
 AddCSLuaFile( "sandbox/gamemode/spawnmenu/controls/control_presets.lua" )
 AddCSLuaFile( "sandbox/gamemode/spawnmenu/controls/preset_editor.lua" )
@@ -29,5 +31,3 @@ AddCSLuaFile( "sandbox/gamemode/spawnmenu/creationmenu/content/contenttypes/npcs
 AddCSLuaFile( "sandbox/gamemode/spawnmenu/creationmenu/content/contenttypes/postprocess.lua" )
 AddCSLuaFile( "sandbox/gamemode/spawnmenu/creationmenu/content/contenttypes/weapons.lua" )
 AddCSLuaFile( "sandbox/gamemode/spawnmenu/creationmenu/content/contenttypes/vehicles.lua" )
-AddCSLuaFile( "sandbox/gamemode/spawnmenu/creationmenu/content/contenttypes/saves.lua" )
-AddCSLuaFile( "sandbox/gamemode/spawnmenu/creationmenu/content/contenttypes/dupes.lua" )
